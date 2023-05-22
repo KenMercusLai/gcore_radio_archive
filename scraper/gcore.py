@@ -30,14 +30,28 @@ def episode_scraper(url):
 
     # Check that the GET request had a 200 status code (meaning the request was successful)
     if response.status_code == 200:
-        # Parse the response text with BeautifulSoup using a HTML parser
+        # Parse the response text with BeautifulSoup using an HTML parser
         soup = BeautifulSoup(response.text, 'html.parser')
-        print(soup.title.string)
+
         nodes = soup.find_all(class_='story_container')
         main_part = nodes[0]
         desc_tags_part = nodes[1]
         likes_bookmarks_part = nodes[2]
+
+        title = main_part.find(class_='originalPage_title').text
+        sub_title = main_part.find(class_='originalPage_desc').text
         hosts = list(map(extract_host_pic_name, main_part.find_all(class_='avatar')))
+        publish_date = main_part.find(class_='me-2')['title']
+        category = main_part.find(class_='u_color-category').text
+        print(title, sub_title, hosts, publish_date, category)
+
+        description = list(map(lambda x: x.text, desc_tags_part.find_all(class_='story_block-text')))
+        tags = list(map(lambda x: x.text, desc_tags_part.find_all(class_='is_tags')))
+        print(description, tags)
+
+        likes = likes_bookmarks_part.find(class_='o_action_num').text
+        bookmarks = likes_bookmarks_part.find(class_='o_bookmark_num').text
+        print(likes, bookmarks)
 
 if __name__ == '__main__':
     # Start scraping from the following URL:
