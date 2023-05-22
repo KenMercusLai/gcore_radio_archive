@@ -1,11 +1,15 @@
+import re
+
 import requests
 from bs4 import BeautifulSoup
-import re
+
 START_URL = 'https://www.gcores.com/radios'
 MATCHING_PREFIX = '/radios'
 
 SCRAPED_URLS = set()
 SCRAPING_QUEUE = set()
+
+
 def index_scraper(start_url):
     # Use the 'requests' library to send a GET request to the website and save the response
     response = requests.get(start_url)
@@ -23,8 +27,11 @@ def index_scraper(start_url):
                 print(href)
                 SCRAPING_QUEUE.add(f'https://www.gcores.com{href}')
 
+
 def extract_host_pic_name(node):
     return node.img['src'], node.find(class_='avatar_text').string
+
+
 def episode_scraper(url):
     response = requests.get(url)
 
@@ -52,6 +59,7 @@ def episode_scraper(url):
         likes = likes_bookmarks_part.find(class_='o_action_num').text
         bookmarks = likes_bookmarks_part.find(class_='o_bookmark_num').text
         print(likes, bookmarks)
+
 
 if __name__ == '__main__':
     # Start scraping from the following URL:
