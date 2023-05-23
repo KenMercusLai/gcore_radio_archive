@@ -74,8 +74,10 @@ def episode_scraper(url: str) -> EPISODE:
         return EPISODE(title, sub_title, hosts, publish_date, category, description, tags, likes, bookmarks, media,
                        cover)
 
+
 def save_episode(episode: EPISODE):
     print(episode)
+
 
 if __name__ == '__main__':
     if len(sys.argv) > 1 and sys.argv[1].lower() == 'all':
