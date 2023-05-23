@@ -36,7 +36,7 @@ def extract_host_pic_name(node):
     return node.img['src'], node.find(class_='avatar_text').string
 
 
-def episode_scraper(url: str) -> namedtuple:
+def episode_scraper(url: str) -> EPISODE:
     response = requests.get(url)
 
     # Check that the GET request had a 200 status code (meaning the request was successful)
@@ -80,7 +80,8 @@ if __name__ == '__main__':
         url = SCRAPING_QUEUE.pop()
         SCRAPED_URLS.add(url)
         if re.match(r'https://www.gcores.com/radios/\d+', url):
-            episode_scraper(url)
+            episode_info = episode_scraper(url)
+            print(episode_info)
             break
         else:
             index_scraper(url)
