@@ -1,3 +1,4 @@
+import os
 import re
 import sys
 from collections import namedtuple
@@ -13,6 +14,11 @@ SCRAPING_QUEUE = set()
 EPISODE = namedtuple('Episode',
                      ['title', 'sub_title', 'hosts', 'publish_date', 'category', 'description', 'tags', 'likes',
                       'bookmarks', 'media', 'cover'])
+DB_HOST = os.environ.get('DB_HOST')
+DB_PORT = os.environ.get('DB_PORT')
+DB_NAME = os.environ.get('DB_NAME')
+DB_USER = os.environ.get('DB_USER')
+DB_PASSWORD = os.environ.get('DB_PASSWORD')
 
 
 def index_scraper(start_url):
