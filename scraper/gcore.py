@@ -1,4 +1,5 @@
 import re
+import sys
 from collections import namedtuple
 
 import requests
@@ -28,8 +29,9 @@ def index_scraper(start_url):
             href = link.get('href')
             # Check if the URL starts with the base URL
             if href and href.startswith(MATCHING_PREFIX):
-                print(href)
-                SCRAPING_QUEUE.add(f'https://www.gcores.com{href}')
+                # print(href)
+                if href not in SCRAPED_URLS:
+                    SCRAPING_QUEUE.add(f'https://www.gcores.com{href}')
 
 
 def extract_host_pic_name(node):
@@ -54,35 +56,44 @@ def episode_scraper(url: str) -> EPISODE:
         hosts = list(map(extract_host_pic_name, main_part.find_all(class_='avatar')))
         publish_date = main_part.find(class_='me-2')['title']
         category = main_part.find(class_='u_color-category').text
-        print(title, sub_title, hosts, publish_date, category)
+        # print(title, sub_title, hosts, publish_date, category)
 
         description = list(map(lambda x: x.text, desc_tags_part.find_all(class_='story_block-text')))
         tags = list(map(lambda x: x.text, desc_tags_part.find_all(class_='is_tags')))
-        print(description, tags)
+        # print(description, tags)
 
         likes = likes_bookmarks_part.find(class_='o_action_num').text
         bookmarks = likes_bookmarks_part.find(class_='o_bookmark_num').text
-        print(likes, bookmarks)
+        # print(likes, bookmarks)
 
         media = soup.find(class_='ms-3')['href']
         cover_css = soup.find(class_='radioPage_header_mask')['style']
         jpg_url = re.findall(r'\((.*?)\)', cover_css)[0]
         cover = jpg_url.split('?')[0]
-        print(media, cover)
+        # print(media, cover)
         return EPISODE(title, sub_title, hosts, publish_date, category, description, tags, likes, bookmarks, media,
                        cover)
 
+def save_episode(episode: EPISODE):
+    print(episode)
 
 if __name__ == '__main__':
+    if len(sys.argv) > 1 and sys.argv[1].lower() == 'all':
+        first_page_only = False
+    else:
+        first_page_only = True
+
     # Start scraping from the following URL:
     SCRAPING_QUEUE.add(START_URL)
     while SCRAPING_QUEUE:
         url = SCRAPING_QUEUE.pop()
+        if url in SCRAPED_URLS:
+            continue
         SCRAPED_URLS.add(url)
         if re.match(r'https://www.gcores.com/radios/\d+', url):
             episode_info = episode_scraper(url)
-            print(episode_info)
-            break
+            save_episode(episode_info)
         else:
+            if first_page_only and url != START_URL:
+                continue
             index_scraper(url)
-            print(len(SCRAPED_URLS), len(SCRAPING_QUEUE))
