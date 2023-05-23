@@ -1,4 +1,5 @@
 import re
+from collections import namedtuple
 
 import requests
 from bs4 import BeautifulSoup
@@ -8,6 +9,9 @@ MATCHING_PREFIX = '/radios'
 
 SCRAPED_URLS = set()
 SCRAPING_QUEUE = set()
+EPISODE = namedtuple('Episode',
+                     ['title', 'sub_title', 'hosts', 'publish_date', 'category', 'description', 'tags', 'likes',
+                      'bookmarks', 'media', 'cover'])
 
 
 def index_scraper(start_url):
@@ -32,7 +36,7 @@ def extract_host_pic_name(node):
     return node.img['src'], node.find(class_='avatar_text').string
 
 
-def episode_scraper(url):
+def episode_scraper(url: str) -> namedtuple:
     response = requests.get(url)
 
     # Check that the GET request had a 200 status code (meaning the request was successful)
@@ -59,6 +63,14 @@ def episode_scraper(url):
         likes = likes_bookmarks_part.find(class_='o_action_num').text
         bookmarks = likes_bookmarks_part.find(class_='o_bookmark_num').text
         print(likes, bookmarks)
+
+        media = soup.find(class_='ms-3')['href']
+        cover_css = soup.find(class_='radioPage_header_mask')['style']
+        jpg_url = re.findall(r'\((.*?)\)', cover_css)[0]
+        cover = jpg_url.split('?')[0]
+        print(media, cover)
+        return EPISODE(title, sub_title, hosts, publish_date, category, description, tags, likes, bookmarks, media,
+                       cover)
 
 
 if __name__ == '__main__':
